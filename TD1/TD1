@@ -1,0 +1,66 @@
+1- Un premier programme en java
+	1.
+		import java.net.*;
+		import java.io.DataInputStream;
+		import java.io.DataOutputStream;
+		import java.io.IOException;
+
+		class Applic{
+			public static void main(String[] args) {
+				ServerSocket sockserv = null;
+				DataInputStream in;
+				DataOutputStream out;
+				byte mess[];
+
+				try {
+				sockserv = new ServerSocket(1234);
+					while(true) {
+						try {
+							Socket sockcli = sockserv.accept();
+							in = new DataInputStream(sockcli.getInputStream());
+							out = new DataOutputStream(sockcli.getOutputStream());
+							mess = new byte[80];
+							in.read(mess,0,80);
+							out.write(mess);
+							sockcli.close();
+						} catch (IOException ex){
+
+						}
+					}
+				} catch (IOException ex){
+
+				} finally {
+						try {
+							sockserv.close();
+						} catch (IOException ex) {
+
+						}
+				}
+				
+			}
+		}
+
+
+
+
+	2.	L'utilisation d'un ServerSocket avec les métohdes qui vont avec: la fonction accept 
+	3. telnet 127.0.0.1 1234
+
+
+2- Le client java
+	1. 
+		VARIABLE
+			socket: Socket
+			in: DataInputStream
+			out: DataOutputStream
+		DEBUT
+			On instancie notre objet socket avec l'url et le port de connexion
+			On se connecte au serveur
+			On instancie nos objets de communication(Stream)
+			On communique
+		FIN
+
+	2. Elle ne peut pas communiquer avec plusieurs client à la fois car quand elle communique avec un client elle est bloquée, il faudrait mettre en place un système multi Thread pour prendre plusieurs clients en charge.
+
+3- Un "chat" en java
+	1. modification des programmes
