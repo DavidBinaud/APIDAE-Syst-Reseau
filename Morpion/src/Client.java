@@ -26,102 +26,115 @@ public class Client {
         String code;
         String grille;
         boolean partieEnCours = true;
-        
-        BufferedReader in;
-        in = new BufferedReader(new InputStreamReader(socketCli.getInputStream()));
-        PrintWriter out;
-        out = new PrintWriter(new OutputStreamWriter(socketCli.getOutputStream()), true);
-        
-        if (socketCli.isConnected()) {
-            System.out.println("Vous etes connecté");
-            
-            System.out.println("Saisir votre pseudonyme :");
-            Scanner sc = new Scanner(System.in);
-            
-            String pseudo = sc.nextLine();
-            out.println(pseudo);
-            while (!in.readLine().contains("103")) {
-                System.out.println("Pseusonyme invalide, veuillez saisir un autre pseudonyme :");
-                pseudo = sc.nextLine();
+
+        try {
+            BufferedReader in;
+            in = new BufferedReader(new InputStreamReader(socketCli.getInputStream()));
+            PrintWriter out;
+            out = new PrintWriter(new OutputStreamWriter(socketCli.getOutputStream()), true);
+
+            if (socketCli.isConnected()) {
+                System.out.println("Vous etes connecté");
+
+                System.out.println("Saisir votre pseudonyme :");
+                Scanner sc = new Scanner(System.in);
+
+                String pseudo = sc.nextLine();
                 out.println(pseudo);
-            }
-            
-            System.out.println("En attente d'un autre joueur ... ");
-            //On affiche la grille vierge
-            code = in.readLine();
-            if (code.contains("205")) {
-                StringJoiner st = new StringJoiner("\n");
-                for (int i = 0; i < 4; i++) {
-                    st.add(in.readLine());
+                while (!in.readLine().contains("103")) {
+                    System.out.println("Pseusonyme invalide, veuillez saisir un autre pseudonyme :");
+                    pseudo = sc.nextLine();
+                    out.println(pseudo);
                 }
-                System.out.println(st.toString());
-            }
-            
-            //attribut les roles
-            code = in.readLine();
-            role = code.contains("201") ? "O" : "X";
-            System.out.println("Vous jouez avec les " + role);
-            //on lance le premier tour
-            
-            do{
-                //traitement switch
-                switch(code.substring(0,3)){
-                    case "201":
-                    System.out.println("Saisir votre coup : ");
-                    verifGestionCoups(in,out,sc,role);
-                    
-                    code = in.readLine();
-                    System.out.println(code);
-                    while(code.contains("204")){
-                        System.out.println("Coup invalide, la case n'est pas vide : ");
-                        verifGestionCoups(in,out,sc,role);
-                        code = in.readLine();
-                    }
-                    //grille
-                    code = in.readLine();
-                    if (code.contains("205")) {
-                        StringJoiner st = new StringJoiner("\n");
-                        for (int i = 0; i < 4; i++) {
-                            st.add(in.readLine());
-                        }
-                        System.out.println(st.toString());
-                    }
-                    break;
-                    
-                    case "202":
-                    System.out.println("Coup de l'adversaire, Veuillez patienter");
-                    //grille
-                    code = in.readLine();
-                    if (code.contains("205")) {
-                        StringJoiner st = new StringJoiner("\n");
-                        for (int i = 0; i < 4; i++) {
-                            st.add(in.readLine());
-                        }
-                        System.out.println(st.toString());
-                    }
-                    break;
-                    
-                    case "301":
-                    System.out.println("Vous avez gagné!");
-                    partieEnCours = false;
-                    return;
-                    case "302":
-                    System.out.println("vous avez perdu!");
-                    partieEnCours = false;
-                    return;
-                    case "303":
-                    System.out.println("Match nul.");
-                    partieEnCours = false;
-                    return;
-                }
-                
+
+                System.out.println("En attente d'un autre joueur ... ");
+                //On affiche la grille vierge
                 code = in.readLine();
+                if (code.contains("205")) {
+                    StringJoiner st = new StringJoiner("\n");
+                    for (int i = 0; i < 4; i++) {
+                        st.add(in.readLine());
+                    }
+                    System.out.println(st.toString());
+                }
+
+                //attribut les roles
+                code = in.readLine();
+                role = code.contains("201") ? "O" : "X";
+                System.out.println("Vous jouez avec les " + role);
+                //on lance le premier tour
+
+                do{
+                    //traitement switch
+                    switch(code.substring(0,3)){
+                        case "201":
+                        System.out.println("Saisir votre coup : ");
+                        verifGestionCoups(in,out,sc,role);
+
+                        code = in.readLine();
+                        while(code.contains("204")){
+                            System.out.println("Coup invalide, la case n'est pas vide : ");
+                            verifGestionCoups(in,out,sc,role);
+                            code = in.readLine();
+                        }
+                        //grille
+                        code = in.readLine();
+                        if (code.contains("205")) {
+                            StringJoiner st = new StringJoiner("\n");
+                            for (int i = 0; i < 4; i++) {
+                                st.add(in.readLine());
+                            }
+                            System.out.println(st.toString());
+                        }
+                        break;
+
+                        case "202":
+                        System.out.println("Coup de l'adversaire, Veuillez patienter");
+                        //grille
+                        code = in.readLine();
+                        if (code.contains("205")) {
+                            StringJoiner st = new StringJoiner("\n");
+                            for (int i = 0; i < 4; i++) {
+                                st.add(in.readLine());
+                            }
+                            System.out.println(st.toString());
+                        }
+                        break;
+
+                        case "301":
+                        System.out.println("Vous avez gagné!");
+                        partieEnCours = false;
+                        return;
+                        case "302":
+                        System.out.println("vous avez perdu!");
+                        partieEnCours = false;
+                        return;
+                        case "303":
+                        System.out.println("Match nul.");
+                        partieEnCours = false;
+                        return;
+                    }
+
+                    code = in.readLine();
+                }
+                while(partieEnCours);
+
+
             }
-            while(partieEnCours);
-            
-            
+        } catch (IOException ioEx){
+            System.err.println(ioEx.getMessage());
+        } catch(NullPointerException nullEx){
+            System.err.println("Adversaire deconnecté");
+        } finally {
+            try {
+                if(!socketCli.isClosed()){
+                    socketCli.close();
+                }
+            } catch (IOException ioEx){
+                System.err.println(ioEx.getMessage());
+            }
         }
-        socketCli.close();
+
     }
     
     public static boolean verifSaisie(String saisie) {

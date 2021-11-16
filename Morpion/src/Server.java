@@ -17,7 +17,7 @@ public class Server {
         }
         
         ArrayList<String> pseudos = new ArrayList<>();
-        ServerSocket sockserv;
+        ServerSocket sockserv = null;
         BufferedReader inCli1;
         BufferedReader inCli2;
         PrintWriter outCli1;
@@ -25,16 +25,18 @@ public class Server {
         
         try {
             sockserv = new ServerSocket(1234);
+            Socket sockCli1 = null;
+            Socket sockCli2 = null;
             try {
                 
                 boolean partieEnCours = true;
                 
-                Socket sockCli1 = sockserv.accept();
+                sockCli1 = sockserv.accept();
                 inCli1 = new BufferedReader(new InputStreamReader(sockCli1.getInputStream()));
                 outCli1 = new PrintWriter(new OutputStreamWriter(sockCli1.getOutputStream()), true);
                 
                 
-                Socket sockCli2 = sockserv.accept();
+                sockCli2 = sockserv.accept();
                 inCli2 = new BufferedReader(new InputStreamReader(sockCli2.getInputStream()));
                 outCli2 = new PrintWriter(new OutputStreamWriter(sockCli2.getOutputStream()), true);
                 
@@ -89,18 +91,41 @@ public class Server {
                 
             }
             catch (IOException ex){
-                
+                System.err.println(ex.getMessage());
+            } finally {
+                try {
+                    if(!sockCli1.isClosed()){
+                        sockCli1.close();
+                    }
+                } catch (IOException ioEx){
+                    System.err.println(ioEx.getMessage());
+                }
+
+                try {
+                    if(!sockCli2.isClosed()){
+                        sockCli2.close();
+                    }
+                } catch (IOException ioEx){
+                    System.err.println(ioEx.getMessage());
+                }
             }
             
         }
         catch(IOException ioEx){
-            
+            System.err.println(ioEx.getMessage());
+        } finally {
+            try{
+                if(!sockserv.isClosed()){
+                    sockserv.close();
+                }
+            } catch(IOException ioEx){
+                System.err.println(ioEx.getMessage());
+            }
         }
     }
     
     private static boolean verifPosition(String pos, String[][] grille){
         int abs = Integer.parseInt(String.valueOf(pos.charAt(1)))  -1;
-        System.err.println(pos + " " + abs);
         switch(pos.charAt(0)){
             case 'A':
             if(grille[0][abs].compareTo(" ") !=0) return false;
@@ -130,7 +155,7 @@ public class Server {
             joinerFinal.add(joinerRow.toString());
             
         }
-        System.out.println(joinerFinal.toString());
+        System.out.println(joinerFinal.toString().substring(3));
         outCli1.println(joinerFinal.toString());
         outCli2.println(joinerFinal.toString());
     }
