@@ -71,9 +71,11 @@ public class Client {
                     verifGestionCoups(in,out,sc,role);
                     
                     code = in.readLine();
+                    System.out.println(code);
                     while(code.contains("204")){
                         System.out.println("Coup invalide, la case n'est pas vide : ");
                         verifGestionCoups(in,out,sc,role);
+                        code = in.readLine();
                     }
                     //grille
                     code = in.readLine();
