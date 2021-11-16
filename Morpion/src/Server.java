@@ -52,7 +52,7 @@ public class Server {
                 BufferedReader inPlayer = inCli1;
                 PrintWriter outWaiter = outCli2;
                 gameLoop:  do{
-é                    while(!verifPosition(inPlayer.readLine(),grille)){
+                    while(!verifPosition(inPlayer.readLine(),grille)){
                         outPlayer.println("204");
                     }
                     outPlayer.println("203");

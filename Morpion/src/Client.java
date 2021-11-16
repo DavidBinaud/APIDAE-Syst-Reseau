@@ -100,15 +100,15 @@ public class Client {
                     break;
                     
                     case "301":
-                    System.out.println("Vous avez gagné");
+                    System.out.println("Vous avez gagné!");
                     partieEnCours = false;
                     return;
                     case "302":
-                    System.out.println("vous avez perdu sale merde");
+                    System.out.println("vous avez perdu!");
                     partieEnCours = false;
                     return;
                     case "303":
-                    System.out.println("vous etes tous les deux des tocards");
+                    System.out.println("Match nul.");
                     partieEnCours = false;
                     return;
                 }
