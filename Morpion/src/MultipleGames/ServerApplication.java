@@ -6,6 +6,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * @authors Ylona Fabiani - Elie Roure - David Binaud
+ */
 public class ServerApplication {
     public static void main(String[] args) {
         ServerSocket sockserv = null;

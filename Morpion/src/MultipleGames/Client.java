@@ -7,6 +7,9 @@ import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @authors Ylona Fabiani - Elie Roure - David Binaud
+ */
 public class Client {
     private static Pattern pattern;
     private static Matcher matcher;
@@ -14,7 +17,6 @@ public class Client {
     public static void main(String[] args) throws Exception {
         Socket socketCli;
         try {
-            //socketCli = new Socket("172.20.10.2", 1234);
             socketCli = new Socket("127.0.0.1", 1234);
         } catch (IOException ioEx) {
             System.out.println("Connexion échoué : " + ioEx.getMessage());
@@ -45,15 +47,10 @@ public class Client {
                     out.println(pseudo);
                 }
 
-                System.out.println("En attente d'un autre joueur ... ");
                 //On affiche la grille vierge
                 code = in.readLine();
                 if (code.contains("205")) {
-                    StringJoiner st = new StringJoiner("\n");
-                    for (int i = 0; i < 4; i++) {
-                        st.add(in.readLine());
-                    }
-                    System.out.println(st.toString());
+                    printGrid(in);
                 }
 
                 //attribut les roles
@@ -78,11 +75,7 @@ public class Client {
                         //grille
                         code = in.readLine();
                         if (code.contains("205")) {
-                            StringJoiner st = new StringJoiner("\n");
-                            for (int i = 0; i < 4; i++) {
-                                st.add(in.readLine());
-                            }
-                            System.out.println(st.toString());
+                            printGrid(in);
                         }
                         break;
 
@@ -91,11 +84,7 @@ public class Client {
                         //grille
                         code = in.readLine();
                         if (code.contains("205")) {
-                            StringJoiner st = new StringJoiner("\n");
-                            for (int i = 0; i < 4; i++) {
-                                st.add(in.readLine());
-                            }
-                            System.out.println(st.toString());
+                            printGrid(in);
                         }
                         break;
 
@@ -146,12 +135,20 @@ public class Client {
     }
     
     public static void verifGestionCoups(BufferedReader in, PrintWriter out, Scanner sc, String role) {
-        String coups = sc.nextLine();
-        while (!verifSaisie(coups)) {
+        String coup = sc.nextLine();
+        while (!verifSaisie(coup)) {
             System.out.println("Saisir votre coup dans le format [ABC][123] : ");
-            coups = sc.nextLine();
+            coup = sc.nextLine();
         }
-        out.println(coups + "_" + role);
+        out.println(coup);
+    }
+
+    private static void printGrid(BufferedReader in) throws IOException{
+        StringJoiner st = new StringJoiner("\n");
+        for (int i = 0; i < 4; i++) {
+            st.add(in.readLine());
+        }
+        System.out.println(st.toString());
     }
 }
 // 
