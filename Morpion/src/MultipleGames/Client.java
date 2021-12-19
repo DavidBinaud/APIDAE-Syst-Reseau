@@ -14,6 +14,7 @@ public class Client {
     public static void main(String[] args) throws Exception {
         Socket socketCli;
         try {
+            //socketCli = new Socket("172.20.10.2", 1234);
             socketCli = new Socket("127.0.0.1", 1234);
         } catch (IOException ioEx) {
             System.out.println("Connexion échoué : " + ioEx.getMessage());

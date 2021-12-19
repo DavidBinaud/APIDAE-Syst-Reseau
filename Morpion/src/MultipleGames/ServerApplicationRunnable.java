@@ -7,7 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringJoiner;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
 public class ServerApplicationRunnable implements Runnable {
+    private static Pattern pattern;
+    private static Matcher matcher;
     private Socket sockCli1;
     private Socket sockCli2;
 
@@ -17,9 +23,10 @@ public class ServerApplicationRunnable implements Runnable {
     private PrintWriter outCli1;
     private PrintWriter outCli2;
 
-    private PrintWriter outPlayer = this.outCli1;
-    private BufferedReader inPlayer = this.inCli1;
-    private PrintWriter outWaiter = this.outCli2;
+    private PrintWriter outPlayer;
+    private BufferedReader inPlayer;
+    private PrintWriter outWaiter;
+    private BufferedReader inWaiter;
 
     private String[][] grille;
     private ArrayList<String> pseudos;
@@ -40,6 +47,7 @@ public class ServerApplicationRunnable implements Runnable {
         this.outPlayer = this.outCli1;
         this.inPlayer = this.inCli1;
         this.outWaiter = this.outCli2;
+        this.inWaiter = this.inCli2;
 
 
         this.grille = new String[3][3];
@@ -50,7 +58,7 @@ public class ServerApplicationRunnable implements Runnable {
             }
         }
 
-       this.pseudos = new ArrayList<>();
+        this.pseudos = new ArrayList<>();
     }
 
     public void run() {
@@ -66,40 +74,45 @@ public class ServerApplicationRunnable implements Runnable {
 
             this.outCli1.println("201");
             this.outCli2.println("202");
+            try{
+                gameLoop:  do{
+                    while(!verifPosition()){
+                        outPlayer.println("204");
+                    }
+                    outPlayer.println("203");
+                    printGrille();
 
-            gameLoop:  do{
-                while(!verifPosition()){
-                    outPlayer.println("204");
-                }
-                outPlayer.println("203");
-                printGrille();
+                    switch(partieEnCours()){
+                        case -1 :
+                            //egalite
+                            this.outPlayer.println("303");
+                            this.outWaiter.println("303");
+                            break gameLoop;
+                        case 0 :
+                            //On continue a jouer
+                            break;
+                        case 1 :
+                            //Heureux gagnant
+                            this.outPlayer.println("301");
+                            this.outWaiter.println("302");
+                            break gameLoop;
 
-                switch(partieEnCours()){
-                    case -1 :
-                        //egalite
-                        this.outPlayer.println("303");
-                        this.outWaiter.println("303");
-                        break gameLoop;
-                    case 0 :
-                        //On continue a jouer
-                        break;
-                    case 1 :
-                        //Heureux gagnant
-                        this.outPlayer.println("301");
-                        this.outWaiter.println("302");
-                        break gameLoop;
-
-                }
+                    }
 
 
-                this.outPlayer.println("202");
-                this.outWaiter.println("201");
+                    this.outPlayer.println("202");
+                    this.outWaiter.println("201");
 
-                this.outPlayer = (this.outCli1 == this.outPlayer) ? this.outCli2 : this.outCli1;
-                this.inPlayer = (this.inCli1 == this.inPlayer) ? this.inCli2 : this.inCli1;
-                this.outWaiter = (this.outCli1 == this.outWaiter) ? this.outCli2 : this.outCli1;
+                    this.outPlayer = (this.outCli1 == this.outPlayer) ? this.outCli2 : this.outCli1;
+                    this.inPlayer = (this.inCli1 == this.inPlayer) ? this.inCli2 : this.inCli1;
+                    this.outWaiter = (this.outCli1 == this.outWaiter) ? this.outCli2 : this.outCli1;
+                    this.inWaiter = (this.inCli1 == this.inWaiter) ? this.inCli2 : this.inCli1;
 
                 }while(true);
+            }
+            catch(NullPointerException NPEx){
+                System.out.println("Joueur deco");
+            }
 
         } catch (IOException ex){
             System.err.println(ex.getMessage());
@@ -131,6 +144,12 @@ public class ServerApplicationRunnable implements Runnable {
         try {
             pos = this.inPlayer.readLine();
         } catch (IOException e) {
+            return false;
+        }
+        pattern = Pattern.compile("^[ABC][123]_[XO]$");
+        System.out.println(pos);
+        matcher = pattern.matcher(pos);
+        if (!matcher.find()) {
             return false;
         }
         int abs = Integer.parseInt(String.valueOf(pos.charAt(1)))  -1;
