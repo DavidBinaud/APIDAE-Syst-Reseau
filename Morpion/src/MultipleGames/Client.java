@@ -64,12 +64,12 @@ public class Client {
                     switch(code.substring(0,3)){
                         case "201":
                         System.out.println("Saisir votre coup : ");
-                        verifGestionCoups(in,out,sc,role);
+                        CheckMove(in,out,sc,role);
 
                         code = in.readLine();
                         while(code.contains("204")){
                             System.out.println("Coup invalide, la case n'est pas vide : ");
-                            verifGestionCoups(in,out,sc,role);
+                            CheckMove(in,out,sc,role);
                             code = in.readLine();
                         }
                         //grille
@@ -123,8 +123,13 @@ public class Client {
         }
 
     }
-    
-    public static boolean verifSaisie(String saisie) {
+
+    /**
+     * Will check the format of the move
+     * @param saisie
+     * @return true if the format is correct, else false
+     */
+    public static boolean checkMoveFormat(String saisie) {
         pattern = Pattern.compile("^[ABC][123]$");
         matcher = pattern.matcher(saisie);
         if (matcher.find()) {
@@ -133,16 +138,28 @@ public class Client {
             return false;
         }
     }
-    
-    public static void verifGestionCoups(BufferedReader in, PrintWriter out, Scanner sc, String role) {
+
+    /**
+     * Will send the move to the server
+     * @param in
+     * @param out
+     * @param sc
+     * @param role
+     */
+    public static void CheckMove(BufferedReader in, PrintWriter out, Scanner sc, String role) {
         String coup = sc.nextLine();
-        while (!verifSaisie(coup)) {
+        while (!checkMoveFormat(coup)) {
             System.out.println("Saisir votre coup dans le format [ABC][123] : ");
             coup = sc.nextLine();
         }
         out.println(coup);
     }
 
+    /**
+     * Will format the grid received from the server and will output it
+     * @param in
+     * @throws IOException
+     */
     private static void printGrid(BufferedReader in) throws IOException{
         StringJoiner st = new StringJoiner("\n");
         for (int i = 0; i < 4; i++) {
