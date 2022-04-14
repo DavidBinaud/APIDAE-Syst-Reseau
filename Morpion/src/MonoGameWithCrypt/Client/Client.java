@@ -205,12 +205,10 @@ public class Client {
         for (int i = 0; i < messageByte.length; i++) {
             messageByte[i] = dis.readByte();
         }
-        System.err.println("reçu:" + new String(messageByte));
         //On décode le message avec la clé DES
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         cipher.init(2, des);
         byte[] messageCode = cipher.doFinal(messageByte);
-        System.err.println("decodé:" + new String(messageCode));
         return new String(messageCode);
     }
 
