@@ -9,7 +9,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.StringJoiner;
-
+/**
+ * @authors Ylona Fabiani - Elie Roure - David Binaud
+ */
 public class Server {
 
     public Socket socketCli1;
@@ -26,6 +28,12 @@ public class Server {
 
     private ArrayList<String> pseudos;
 
+    /**
+     * Constructor for the Server class
+     * @param sockCli1 the socket corresponding to the first client
+     * @param sockCli2 the socket corresponding to the second client
+     * @throws Exception
+     */
     public Server(Socket sockCli1, Socket sockCli2) throws Exception {
         pseudos = new ArrayList<>();
         grille = new String[3][3];
@@ -53,6 +61,20 @@ public class Server {
 
     }
 
+    /**
+     * Method that will get the RSA key sent by a client from the corresponding DataInputStream,
+     * will encrypt the previously generated DES key with the public RSA key and will send it back to the client
+     * via the corresponding DataOutputStream.
+     * @param dis DataInputStream
+     * @param dos DataOutputStream
+     * @throws IOException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     private void getRSAFromClientAndSendEncryptedDES(DataInputStream dis, DataOutputStream dos) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         PublicKey rsa;
         //On récupère la clé en tant que tableau de byte
@@ -75,8 +97,12 @@ public class Server {
         dos.write(desByte);
     }
 
-    //Jete une exception lorsque le socket n'est plus valide
-    //Renvoie "" lorsqu'il n'y a rien a lire
+    /**
+     * Lit depuis la socket et décrypte le message lu
+     * @param dis DataInputStream from which we will be reading
+     * @return String le message décrypté
+     * @throws Exception
+     */
     public String readSocket(DataInputStream dis) throws Exception {
 
         while (dis.available() == 0) ;
@@ -100,7 +126,12 @@ public class Server {
 
     }
 
-    //Renvoie false lorsque le socket n'est plus valide
+    /**
+     * Envoi un message crypté dans la socket
+     * @param dos DataOutputStream from which we will send the encrypted message
+     * @param message String le message à crypter puis envoyer
+     * @throws Exception
+     */
     public boolean sendSocket(DataOutputStream dos, String message) throws Exception {
         //On encrypte le message avec la clé DES
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
@@ -131,7 +162,7 @@ public class Server {
                 pseudos.add(readSocket(disClient2));
                 sendSocket(dosClient2, "103");
 
-                printGrille();
+                printGrid();
 
                 sendSocket(dosClient1, "201");
                 sendSocket(dosClient2, "202");
@@ -140,13 +171,13 @@ public class Server {
                 DataOutputStream outWaiter = dosClient2;
                 gameLoop:
                 do {
-                    while (!verifPosition(readSocket(inPlayer), grille)) {
+                    while (!checkPos(readSocket(inPlayer), grille)) {
                         sendSocket(outPlayer, "204");
                     }
                     sendSocket(outPlayer, "203");
-                    printGrille();
+                    printGrid();
 
-                    switch (partieEnCours()) {
+                    switch (isGamePlaying()) {
                         case -1:
                             //egalite
                             sendSocket(outPlayer, "303");
@@ -199,7 +230,12 @@ public class Server {
         }
     }
 
-    private static boolean verifPosition(String pos, String[][] grille) {
+    /**
+     * Function that will ask the player a move and check if it's a valid move.
+     * It will play the move if it's valid.
+     * @return true if the position given by the playing player is valid(in the grid and empty) else it returns false
+     */
+    private static boolean checkPos(String pos, String[][] grille) {
         int abs = Integer.parseInt(String.valueOf(pos.charAt(1))) - 1;
         switch (pos.charAt(0)) {
             case 'A':
@@ -219,7 +255,12 @@ public class Server {
         return true;
     }
 
-    private void printGrille() throws Exception {
+    /**
+     * Function that will format the grid to a friendly format
+     * And it will then send that output to the two players
+     * @throws IOException
+     */
+    private void printGrid() throws Exception {
         StringJoiner joinerFinal = new StringJoiner("\n", "205\n    1   2   3\n", "");
         for (int i = 0; i < 3; i++) {
             StringJoiner joinerRow = new StringJoiner(" | ", "", " |");
@@ -235,11 +276,14 @@ public class Server {
         sendSocket(dosClient2, joinerFinal.toString());
     }
 
-    private void verifPseudo() {
-
-    }
-
-    private int partieEnCours() {
+    /**
+     * Function that will check the state of the game.
+     * It will check if someone won and/or any move is still possible(there's an empty box)
+     * @return 1 if a player has won meaning there's 3 of the same symbols on the same row or the same column or in one of the diagonals
+     *         0 if nobody has won and there's still room to play
+     *         -1 if nobody has won and there's no room to play, ie it's a draw
+     */
+    private int isGamePlaying() {
         //verif ligne OK
         for (int ligne = 0; ligne < 3; ligne++) {
             if (!grille[ligne][0].equals(" ") && grille[ligne][0].equals(grille[ligne][1]) && grille[ligne][0].equals(grille[ligne][2])) {

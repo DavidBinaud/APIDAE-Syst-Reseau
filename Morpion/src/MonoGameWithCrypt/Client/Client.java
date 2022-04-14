@@ -9,10 +9,11 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Scanner;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**
+ * @authors Ylona Fabiani - Elie Roure - David Binaud
+ */
 public class Client {
     private static Pattern pattern;
     private static Matcher matcher;
@@ -26,6 +27,11 @@ public class Client {
     private KeyPair rsa;
     private Key des;
 
+    /**
+     * Constructor for the Client class
+     * @param s Socket used to communicate with the server
+     * @throws Exception
+     */
     public Client(Socket s) throws Exception {
         this.socketCli = s;
         this.dos = new DataOutputStream(s.getOutputStream());
@@ -33,6 +39,9 @@ public class Client {
         initCryptage();
     }
 
+    /**
+     * Runs during the whole game of Morpion
+     */
     public void run() {
         String role;
         String code;
@@ -72,12 +81,12 @@ public class Client {
                     switch (code.substring(0, 3)) {
                         case "201":
                             System.out.println("Saisir votre coup : ");
-                            verifGestionCoups(sc, role);
+                            CheckMove(sc, role);
 
                             code = readSocket();
                             while (code.contains("204")) {
                                 System.out.println("Coup invalide, la case n'est pas vide : ");
-                                verifGestionCoups(sc, role);
+                                CheckMove(sc, role);
                                 code = readSocket();
                             }
                             //grille
@@ -133,7 +142,12 @@ public class Client {
         }
     }
 
-    public boolean verifSaisie(String saisie) {
+    /**
+     * Will check the format of the move
+     * @param saisie
+     * @return true if the format is correct, else false
+     */
+    public boolean checkMoveFormat(String saisie) {
         pattern = Pattern.compile("^[ABC][123]$");
         matcher = pattern.matcher(saisie);
         if (matcher.find()) {
@@ -143,15 +157,25 @@ public class Client {
         }
     }
 
-    public void verifGestionCoups(Scanner sc, String role) throws Exception {
+    /**
+     * Will send the move to the server
+     * @param sc The Scanner used
+     * @param role The role of the player, either X or O
+     */
+    public void CheckMove(Scanner sc, String role) throws Exception {
         String coups = sc.nextLine();
-        while (!verifSaisie(coups)) {
+        while (!checkMoveFormat(coups)) {
             System.out.println("Saisir votre coup dans le format [ABC][123] : ");
             coups = sc.nextLine();
         }
         sendSocket(coups + "_" + role);
     }
 
+    /**
+     * Envoi un message crypté dans la socket
+     * @param message String le message à crypter puis envoyer
+     * @throws Exception
+     */
     public synchronized void sendSocket(String message) throws Exception {
         //On encrypte avec la clé DES qu'on a et on envoie la taille du tableau de byte, puis le tableau de byte
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
@@ -161,6 +185,11 @@ public class Client {
         dos.write(messageCode);
     }
 
+    /**
+     * Lit depuis la socket et décrypte le message lu
+     * @return String le message décrypté
+     * @throws Exception
+     */
     public String readSocket() throws Exception {
         while (dis.available() == 0) ;
 
@@ -185,7 +214,11 @@ public class Client {
         return new String(messageCode);
     }
 
-    //Méthode éxécuter lors de la connexion avec le serveur pour échanger les clés
+
+    /**
+     * It initalizes the RSA key, sends it to the server and gets the DES key crypted by the RSA and decodes it.
+     * @throws Exception
+     */
     public void initCryptage() throws Exception {
         //On créer une pair de clé RSA
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");

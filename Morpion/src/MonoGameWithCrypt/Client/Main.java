@@ -1,13 +1,18 @@
 package MonoGameWithCrypt.Client;
 
-import MonoGameWithCrypt.ClientP.InputReader;
-
 import java.net.Socket;
 
-
+/**
+ * @authors Ylona Fabiani - Elie Roure - David Binaud
+ */
 public class Main
 {
 
+    /**
+     * Main function, used to connect to a socket and create a Client
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception
     {
         Socket socket = new Socket("localhost", 1234);
